@@ -1,5 +1,5 @@
 # Lidar-Obstacle-Detection
-  idar obstacle detection using PCL and C++
+  Lidar obstacle detection using PCL and C++
 
 ## Installation
 
