@@ -41,6 +41,9 @@ http://www.pointclouds.org/downloads/windows.html
 	$> brew install pcl
 	```
 
+Possible issue: 'simulation is required but glew was not found':
+- check details [here](https://github.com/PointCloudLibrary/pcl/issues/2997#issuecomment-536234201)
+
 #### Prebuilt Binaries via Universal Installer
 http://www.pointclouds.org/downloads/macosx.html  
 NOTE: very old version
