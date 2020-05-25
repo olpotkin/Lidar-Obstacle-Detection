@@ -2,3 +2,4 @@
 .idea/*
 cmake-build-debug/*
 .DS_Store
+src/quiz/ransac/build/*
