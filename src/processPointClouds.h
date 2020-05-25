@@ -15,6 +15,7 @@
 #include <iostream> 
 #include <string>  
 #include <vector>
+#include <unordered_set>
 #include <ctime>
 #include <chrono>
 #include "render/box.h"
@@ -43,11 +44,20 @@ public:
     pcl::PointIndices::Ptr                inliers,
     typename pcl::PointCloud<PointT>::Ptr cloud);
 
+  /// @brief Deprecated
   std::pair<typename pcl::PointCloud<PointT>::Ptr,
             typename pcl::PointCloud<PointT>::Ptr> SegmentPlane(
     typename pcl::PointCloud<PointT>::Ptr cloud,
     int                                   maxIterations,
     float                                 distanceThreshold);
+
+  /// @brief RANSAC for Plane (3D)
+  std::pair<typename pcl::PointCloud<PointT>::Ptr,
+    typename pcl::PointCloud<PointT>::Ptr> RansacPlane(
+    typename pcl::PointCloud<PointT>::Ptr cloud,
+    int                                   maxIterations,
+    float                                 distanceThreshold);
+
 
     std::vector<typename pcl::PointCloud<PointT>::Ptr> Clustering(
       typename pcl::PointCloud<PointT>::Ptr cloud,

@@ -110,6 +110,96 @@ std::pair<typename pcl::PointCloud<PointT>::Ptr,
 
 
 template<typename PointT>
+std::pair<typename pcl::PointCloud<PointT>::Ptr,
+          typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::RansacPlane (
+  typename pcl::PointCloud<PointT>::Ptr cloud,
+  int                                   maxIterations,
+  float                                 distanceTol)
+{
+  // Time segmentation process
+  auto startTime = std::chrono::steady_clock::now();
+
+  std::unordered_set<int> inliersResult;
+  srand(time(NULL));
+
+  // For max iterations
+  while (maxIterations--) {
+    std::unordered_set<int> inliers;
+
+    // Randomly pick 2 points
+    while (inliers.size() < 3) {
+      inliers.insert(rand() % (cloud->points.size()));
+    }
+
+    float x1, y1, z1;
+    float x2, y2, z2;
+    float x3, y3, z3;
+
+    auto itr = inliers.begin();
+    x1 = cloud->points[*itr].x;
+    y1 = cloud->points[*itr].y;
+    z1 = cloud->points[*itr].z;
+    itr++;
+    x2 = cloud->points[*itr].x;
+    y2 = cloud->points[*itr].y;
+    z2 = cloud->points[*itr].z;
+    itr++;
+    x3 = cloud->points[*itr].x;
+    y3 = cloud->points[*itr].y;
+    z3 = cloud->points[*itr].z;
+
+    float a = (y2 - y1) * (z3 - z1) - (z2 - z1) * (y3 - y1);
+    float b = (z2 - z1) * (x3 - x1) - (x2 - x1) * (z3 - z1);
+    float c = (x2 - x1) * (y3 - y1) - (y2 - y1) * (x3 - x1);
+    float d = -(a * x1 + b * y1 + c * z1);
+
+    for (int index = 0; index < cloud->points.size(); ++index) {
+      if (inliers.count(index) > 0) {
+        continue;
+      }
+
+      pcl::PointXYZ point = cloud->points[index];
+      float x4 = point.x;
+      float y4 = point.y;
+      float z4 = point.z;
+
+      float d = fabs(a * x4 + b * y4 + c * z4 + d) / sqrt(a * a + b * b + c * c);
+
+      // If distance is smaller than threshold count it as inlier
+      if (d <= distanceTol) {
+        inliers.insert(index);
+      }
+    }
+
+    if (inliers.size() > inliersResult.size()) {
+      inliersResult = inliers;
+    }
+  }
+
+  auto endTime = std::chrono::steady_clock::now();
+  auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+  std::cout << "Plane RANSAC took " << elapsedTime.count() << " milliseconds" << std::endl;
+
+  typename pcl::PointCloud<PointT>::Ptr cloudInliers(new pcl::PointCloud<PointT>());
+  typename pcl::PointCloud<PointT>::Ptr cloudOutliers(new pcl::PointCloud<PointT>());
+
+  for (int index = 0; index < cloud->points.size(); ++index) {
+    PointT point = cloud->points[index];
+
+    if (inliersResult.count(index)) {
+      cloudInliers->points.push_back(point);
+    }
+    else {
+      cloudOutliers->points.push_back(point);
+    }
+  }
+
+  return std::pair<typename pcl::PointCloud<PointT>::Ptr,
+                   typename pcl::PointCloud<PointT>::Ptr>(cloudOutliers, cloudInliers);
+}
+
+
+template<typename PointT>
 std::vector<typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::Clustering(
   typename pcl::PointCloud<PointT>::Ptr cloud,
   float                                 clusterTolerance,
