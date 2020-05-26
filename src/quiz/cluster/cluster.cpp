@@ -54,14 +54,12 @@ void render2DTree(
   int&                                    iteration,
   uint                                    depth=0)
 {
-  if(node != NULL)
-  {
+  if (node != nullptr) {
     Box upperWindow = window;
     Box lowerWindow = window;
 
-    // split on x axis
-    if (depth % 2 == 0)
-    {
+    // Split on x axis
+    if (depth % 2 == 0) {
       viewer->addLine(
         pcl::PointXYZ(node->point[0], window.y_min, 0),
         pcl::PointXYZ(node->point[0], window.y_max, 0),
@@ -71,9 +69,8 @@ void render2DTree(
       upperWindow.x_min = node->point[0];
 
     }
-    // split on y axis
-    else
-    {
+    // Split on y axis
+    else {
       viewer->addLine(
         pcl::PointXYZ(window.x_min, node->point[1], 0),
         pcl::PointXYZ(window.x_max, node->point[1], 0),
@@ -83,7 +80,7 @@ void render2DTree(
       upperWindow.y_min = node->point[1];
     }
 
-    iteration++;
+    ++iteration;
 
     render2DTree(node->left,  viewer, lowerWindow, iteration, depth + 1);
     render2DTree(node->right, viewer, upperWindow, iteration, depth + 1);
@@ -135,7 +132,7 @@ int main ()
     }
 
     int it = 0;
-    render2DTree(tree->root,viewer,window, it);
+    render2DTree(tree->root,viewer, window, it);
 
     std::cout << "Test Search" << std::endl;
     std::vector<int> nearby = tree->search({-6,7},3.0);
