@@ -218,6 +218,7 @@ std::vector<typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::C
 
   std::vector<pcl::PointIndices> clusterIndices;
   pcl::EuclideanClusterExtraction<PointT> ec;
+
   ec.setClusterTolerance(clusterTolerance);
   ec.setMinClusterSize(minSize);
   ec.setMaxClusterSize(maxSize);
@@ -249,7 +250,78 @@ std::vector<typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::C
 
 
 template<typename PointT>
-Box ProcessPointClouds<PointT>::BoundingBox(typename pcl::PointCloud<PointT>::Ptr cluster)
+void ProcessPointClouds<PointT>::clusterHelper(
+  int                                   idx,
+  typename pcl::PointCloud<PointT>::Ptr cloud,
+  std::vector<int>&                     cluster,
+  std::vector<bool>&                    processed,
+  KdTree*                               tree,
+  float                                 distanceTol) {
+
+  processed[idx] = true;
+  cluster.push_back(idx);
+
+  std::vector<int> nearest = tree->search(cloud->points[idx], distanceTol);
+
+  for (int id : nearest) {
+    if (!processed[id]) {
+      // Recursive call
+      clusterHelper(id, cloud, cluster, processed, tree, distanceTol);
+    }
+  }
+}
+
+
+/// @brief @todo
+/// @param[out] vector<vector<int>> - list of indices for each cluster
+template<typename PointT>
+std::vector<typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::euclideanCluster(
+  typename pcl::PointCloud<PointT>::Ptr cloud,
+  KdTree*                               tree,
+  float                                 distanceTol,
+  int                                   minSize,
+  int                                   maxSize) {
+  // Fill out this function to return list of indices for each cluster
+  std::vector<typename pcl::PointCloud<PointT>::Ptr> clusters;
+  std::vector<bool> processed(cloud->points.size(), false);
+
+  for (int idx = 0; idx < cloud->points.size(); ++idx) {
+    if (processed[idx] == false) {
+      std::vector<int> clusterIdx;
+      typename pcl::PointCloud<PointT>::Ptr cluster(new pcl::PointCloud<PointT>);
+
+      // Call helper method
+      clusterHelper(idx, cloud, clusterIdx, processed, tree, distanceTol);
+
+      if (clusterIdx.size() >= minSize && clusterIdx.size() <= maxSize)
+      {
+        for (int i = 0; i < clusterIdx.size(); ++i)
+        {
+          cluster->points.push_back(cloud->points[clusterIdx[i]]);
+        }
+
+        cluster->width = cluster->points.size();
+        cluster->height = 1;
+
+        clusters.push_back(cluster);
+      }
+      else
+      {
+        for (int i = 1; i < clusterIdx.size(); ++i)
+        {
+          processed[clusterIdx[i]] = false;
+        }
+      }
+    }
+  }
+
+  return clusters;
+}
+
+
+template<typename PointT>
+Box ProcessPointClouds<PointT>::BoundingBox(
+  typename pcl::PointCloud<PointT>::Ptr cluster)
 {
   // Find bounding box for one of the clusters
   PointT minPoint, maxPoint;
@@ -296,7 +368,9 @@ typename pcl::PointCloud<PointT>::Ptr ProcessPointClouds<PointT>::loadPcd(std::s
 template<typename PointT>
 std::vector<boost::filesystem::path> ProcessPointClouds<PointT>::streamPcd(std::string dataPath)
 {
-  std::vector<boost::filesystem::path> paths(boost::filesystem::directory_iterator{dataPath}, boost::filesystem::directory_iterator{});
+  std::vector<boost::filesystem::path> paths(
+    boost::filesystem::directory_iterator{dataPath},
+    boost::filesystem::directory_iterator{});
 
   // sort files in ascending order so playback is chronological
   sort(paths.begin(), paths.end());

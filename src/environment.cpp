@@ -52,19 +52,29 @@ void simpleHighway(pcl::visualization::PCLVisualizer::Ptr& viewer)
 
   /// Create point processor
   ProcessPointClouds<pcl::PointXYZ> pointProcessor;
+
   //std::pair<pcl::PointCloud<pcl::PointXYZ>::Ptr, pcl::PointCloud<pcl::PointXYZ>::Ptr> segmentCloud =
   //            pointProcessor.SegmentPlane(inputCloud, 100, 0.2);
   std::pair<pcl::PointCloud<pcl::PointXYZ>::Ptr, pcl::PointCloud<pcl::PointXYZ>::Ptr> segmentCloud =
     pointProcessor.RansacPlane(inputCloud, 100, 0.2);
+
   // Comment out renderPointCloud to render only clusters
   renderPointCloud(viewer, segmentCloud.first, "obstCloud", Color(1.0, 0, 0));
   renderPointCloud(viewer, segmentCloud.second, "planeCloud", Color(0, 1.0, 0));
 
   /// Clustering
-  std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> cloudClusters = pointProcessor.Clustering(
-    segmentCloud.first, 1.0, 3, 30);
+  KdTree* tree = new KdTree;
+  for (int i = 0; i < segmentCloud.first->points.size(); ++i) {
+    tree->insert(segmentCloud.first->points[i], i);
+  }
+
+  //std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> cloudClusters = pointProcessor.Clustering(
+  //  segmentCloud.first, 1.0, 3, 30);
+  std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> cloudClusters = pointProcessor.euclideanCluster(
+    segmentCloud.first, tree, 1.0, 3, 30);
 
   int clusterId = 0;
+
   std::vector<Color> colors = {
     Color(1, 0, 0),
     Color(1, 1, 0),
@@ -82,6 +92,8 @@ void simpleHighway(pcl::visualization::PCLVisualizer::Ptr& viewer)
 
     ++clusterId;
   }
+
+  delete tree;
 }
 
 
