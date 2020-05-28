@@ -170,6 +170,7 @@ public:
 
   void numPoints(typename pcl::PointCloud<PointT>::Ptr cloud);
 
+  /// @brief Apply voxel grid filtering to the point cloud
   typename pcl::PointCloud<PointT>::Ptr FilterCloud(
     typename pcl::PointCloud<PointT>::Ptr cloud,
     float                                 filterRes,

@@ -106,6 +106,13 @@ void cityBlock(pcl::visualization::PCLVisualizer::Ptr& viewer)
   pcl::PointCloud<pcl::PointXYZI>::Ptr inputCloud =
     pointProcessorI->loadPcd("../src/sensors/data/pcd/data_1/0000000000.pcd");
 
+  // Apply voxel grid filter
+  inputCloud = pointProcessorI->FilterCloud(
+    inputCloud,
+    0.3 ,
+    Eigen::Vector4f (-20, -6, -3, 1),
+    Eigen::Vector4f ( 30, 7, 2, 1));
+
   renderPointCloud(viewer, inputCloud, "inputCloud");
 }
 
