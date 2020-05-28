@@ -98,6 +98,18 @@ void simpleHighway(pcl::visualization::PCLVisualizer::Ptr& viewer)
 }
 
 
+/// @brief Open 3D viewer and display City Block
+void cityBlock(pcl::visualization::PCLVisualizer::Ptr& viewer)
+{
+  ProcessPointClouds<pcl::PointXYZI>* pointProcessorI = new ProcessPointClouds<pcl::PointXYZI>();
+
+  pcl::PointCloud<pcl::PointXYZI>::Ptr inputCloud =
+    pointProcessorI->loadPcd("../src/sensors/data/pcd/data_1/0000000000.pcd");
+
+  renderPointCloud(viewer, inputCloud, "inputCloud");
+}
+
+
 //setAngle: SWITCH CAMERA ANGLE {XY, TopDown, Side, FPS}
 void initCamera(
   CameraAngle                             setAngle,
@@ -139,7 +151,9 @@ int main (int argc, char** argv)
     new pcl::visualization::PCLVisualizer ("3D Viewer"));
   CameraAngle setAngle = XY;
   initCamera(setAngle, viewer);
-  simpleHighway(viewer);
+
+  //simpleHighway(viewer);
+  cityBlock(viewer);
 
   while (!viewer->wasStopped ()) {
     viewer->spinOnce ();
