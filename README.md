@@ -29,11 +29,11 @@ The detection pipeline includes the following steps:
 
 **Step 4:** Cluster the obstacle cloud
 
-![Clustering][image3]
+![Clustering][image4]
 
 **Step 5:** Render bounding boxes around the clusters
 
-![BBoxes][image4]
+![BBoxes][image5]
 
 The segmentation, and clustering methods were created from scratch.
 
