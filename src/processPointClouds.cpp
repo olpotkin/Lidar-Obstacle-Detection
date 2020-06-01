@@ -147,7 +147,7 @@ std::pair<typename pcl::PointCloud<PointT>::Ptr,
 
 template<typename PointT>
 std::pair<typename pcl::PointCloud<PointT>::Ptr,
-          typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::RansacPlane (
+          typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::RansacPlane(
   typename pcl::PointCloud<PointT>::Ptr cloud,
   int                                   maxIterations,
   float                                 distanceTol)
@@ -156,7 +156,7 @@ std::pair<typename pcl::PointCloud<PointT>::Ptr,
   auto startTime = std::chrono::steady_clock::now();
 
   std::unordered_set<int> inliersResult;
-  srand(time(NULL));
+  srand(time(nullptr));
 
   // For max iterations
   while (maxIterations--) {
@@ -172,6 +172,7 @@ std::pair<typename pcl::PointCloud<PointT>::Ptr,
     float x3, y3, z3;
 
     auto itr = inliers.begin();
+
     x1 = cloud->points[*itr].x;
     y1 = cloud->points[*itr].y;
     z1 = cloud->points[*itr].z;
@@ -194,15 +195,15 @@ std::pair<typename pcl::PointCloud<PointT>::Ptr,
         continue;
       }
 
-      pcl::PointXYZ point = cloud->points[index];
+      PointT point = cloud->points[index];
       float x4 = point.x;
       float y4 = point.y;
       float z4 = point.z;
 
-      float d = fabs(a * x4 + b * y4 + c * z4 + d) / sqrt(a * a + b * b + c * c);
+      float dist = fabs(a * x4 + b * y4 + c * z4 + d) / sqrt(a * a + b * b + c * c);
 
       // If distance is smaller than threshold count it as inlier
-      if (d <= distanceTol) {
+      if (dist <= distanceTol) {
         inliers.insert(index);
       }
     }
