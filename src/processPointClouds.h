@@ -146,7 +146,7 @@ struct KdTree
   // Return a list of point ids in the tree that are within distance of target
   std::vector<int> search(
     pcl::PointXYZI target,
-    float          distanceTol)
+    const float&   distanceTol)
   {
     std::vector<int> ids;
     searchHelper(target, root, 0, distanceTol, ids);
@@ -218,7 +218,9 @@ public:
 
     Box BoundingBox(typename pcl::PointCloud<PointT>::Ptr cluster);
 
-    void savePcd(typename pcl::PointCloud<PointT>::Ptr cloud, std::string file);
+    void savePcd(
+      typename pcl::PointCloud<PointT>::Ptr cloud,
+      std::string                           file);
 
     typename pcl::PointCloud<PointT>::Ptr loadPcd(std::string file);
 

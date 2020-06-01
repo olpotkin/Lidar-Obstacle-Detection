@@ -33,6 +33,7 @@ std::vector<Car> initHighway(bool renderScene, pcl::visualization::PCLVisualizer
 }
 
 
+/// @deprecated
 void simpleHighway(pcl::visualization::PCLVisualizer::Ptr& viewer)
 {
   // ----------------------------------------------------
