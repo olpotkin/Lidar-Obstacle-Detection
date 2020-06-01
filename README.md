@@ -1,5 +1,8 @@
 # Lidar-Obstacle-Detection
-  Lidar obstacle detection using PCL and C++
+
+Lidar obstacle detection using PCL and C++
+  
+See the [demo on YouTube](https://youtu.be/vvIn1Js49oA)
 
 [image1]: ./docs/images/step-0-original.png
 [image2]: ./docs/images/step-1-filter.png
@@ -10,10 +13,10 @@
 
 ## Approach
 
-This project is aimed to show basic scenarios for processing point clouds to detect obstacles, 
-and use it to detect car and trucks on a narrow street using Lidar.
+This project is aimed to show basic scenarios for processing point clouds to detect the obstacles, 
+and use it to detect cars and trucks on a narrow street using Lidar data.
 
-The detection pipeline includes the following steps:
+### The detection pipeline includes the following steps:
 
 **Step 1:** Load PCD data from file
 
