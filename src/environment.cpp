@@ -63,15 +63,8 @@ void simpleHighway(pcl::visualization::PCLVisualizer::Ptr& viewer)
   renderPointCloud(viewer, segmentCloud.second, "planeCloud", Color(0, 1.0, 0));
 
   /// Clustering
-  KdTree* tree = new KdTree;
-  for (int i = 0; i < segmentCloud.first->points.size(); ++i) {
-    tree->insert(segmentCloud.first->points[i], i);
-  }
-
-  //std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> cloudClusters = pointProcessor.Clustering(
-  //  segmentCloud.first, 1.0, 3, 30);
-  std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> cloudClusters = pointProcessor.euclideanCluster(
-    segmentCloud.first, tree, 1.0, 3, 30);
+  std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> cloudClusters = pointProcessor.Clustering(
+    segmentCloud.first, 1.0, 3, 30);
 
   int clusterId = 0;
 
@@ -93,8 +86,6 @@ void simpleHighway(pcl::visualization::PCLVisualizer::Ptr& viewer)
 
     ++clusterId;
   }
-
-  delete tree;
 }
 
 
@@ -103,17 +94,56 @@ void cityBlock(pcl::visualization::PCLVisualizer::Ptr& viewer)
 {
   ProcessPointClouds<pcl::PointXYZI>* pointProcessorI = new ProcessPointClouds<pcl::PointXYZI>();
 
+  // Step 0: Load PCD-file
   pcl::PointCloud<pcl::PointXYZI>::Ptr inputCloud =
     pointProcessorI->loadPcd("../src/sensors/data/pcd/data_1/0000000000.pcd");
 
-  // Apply voxel grid filter
+  // Step 1: Apply voxel grid filter
   inputCloud = pointProcessorI->FilterCloud(
     inputCloud,
     0.3 ,
     Eigen::Vector4f (-20, -6, -3, 1),
     Eigen::Vector4f ( 30, 7, 2, 1));
+  //renderPointCloud(viewer, inputCloud, "inputCloud");
 
-  renderPointCloud(viewer, inputCloud, "inputCloud");
+  // Step 2: Segment the filtered cloud into two parts, road and obstacles
+  std::pair<pcl::PointCloud<pcl::PointXYZI>::Ptr, pcl::PointCloud<pcl::PointXYZI>::Ptr> segmentCloud =
+    pointProcessorI->RansacPlane(inputCloud, 100, 0.2);
+
+  renderPointCloud(viewer, segmentCloud.second, "planeCloud", Color(0, 1, 0));
+  renderPointCloud(viewer, segmentCloud.first,  "obstCloud", Color(1, 0, 0));
+
+  // Step 3: Cluster the obstacle cloud
+  KdTree* tree = new KdTree;
+  for (int i = 0; i < segmentCloud.first->points.size(); ++i) {
+    tree->insert(segmentCloud.first->points[i], i);
+  }
+  std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> cloudClusters = pointProcessorI->euclideanCluster(
+    segmentCloud.first, tree, 0.35, 15, 500);
+
+  int clusterId = 0;
+
+  std::vector<Color> colors = {
+    Color(1, 0, 0),
+    Color(1, 1, 0),
+    Color(0, 0, 1)
+  };
+
+  for (pcl::PointCloud<pcl::PointXYZI>::Ptr cluster : cloudClusters) {
+    // Render points of the cluster
+    std::cout << "cluster size ";
+    pointProcessorI->numPoints(cluster);
+    renderPointCloud(viewer, cluster, "obstCloud" + std::to_string(clusterId), colors[clusterId % colors.size()]);
+
+    // Step 4: Render bounding box around cluster
+    Box box = pointProcessorI->BoundingBox(cluster);
+    renderBox(viewer, box, clusterId);
+
+    ++clusterId;
+  }
+
+  delete tree;
+  delete pointProcessorI;
 }
 
 

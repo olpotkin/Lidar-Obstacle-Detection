@@ -24,14 +24,14 @@
 /// @brief Structure to represent node of kd-tree
 struct Node
 {
-  pcl::PointXYZ point;
-  int           id;
-  Node*         left;
-  Node*         right;
+  pcl::PointXYZI point;
+  int            id;
+  Node*          left;
+  Node*          right;
 
   Node(
-    pcl::PointXYZ arr,
-    int           setId)
+    pcl::PointXYZI arr,
+    int            setId)
     : point (arr)
     , id    (setId)
     , left  (nullptr)
@@ -51,10 +51,10 @@ struct KdTree
 
 
   void insertHelper(
-    Node**        node,
-    uint          depth,
-    pcl::PointXYZ point,
-    int           id)
+    Node**         node,
+    uint           depth,
+    pcl::PointXYZI point,
+    int            id)
   {
     // Tree is empty
     if (*node == nullptr) {
@@ -88,8 +88,8 @@ struct KdTree
   /// @param[in] point - 2D point represented by a vector containing two floats
   /// @param[in] id - Unique identifier of the point
   void insert(
-    pcl::PointXYZ point,
-    int           id)
+    pcl::PointXYZI point,
+    int            id)
   {
     // This function inserts a new point into the tree.
     // The function should create a new node and place correctly with in the root
@@ -98,7 +98,7 @@ struct KdTree
 
 
   void searchHelper(
-    pcl::PointXYZ     target,
+    pcl::PointXYZI    target,
     Node*             node,
     const int         depth,
     const float&      distanceTol,
@@ -145,8 +145,8 @@ struct KdTree
 
   // Return a list of point ids in the tree that are within distance of target
   std::vector<int> search(
-    pcl::PointXYZ target,
-    float         distanceTol)
+    pcl::PointXYZI target,
+    float          distanceTol)
   {
     std::vector<int> ids;
     searchHelper(target, root, 0, distanceTol, ids);
@@ -154,8 +154,6 @@ struct KdTree
     return ids;
   }
 };
-
-
 
 
 template<typename PointT>
